@@ -2,6 +2,7 @@ package com.bolsadeideas.springboot.webflux.app.controllers;
 
 import com.bolsadeideas.springboot.webflux.app.models.documents.Producto;
 import com.bolsadeideas.springboot.webflux.app.models.services.ProductoService;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +20,11 @@ public class ProductoController {
     }
 
     @GetMapping
-    public Mono<ResponseEntity<Flux<Producto>>> lista(){
-        return Mono.just(ResponseEntity.ok(this.productoService.findAll()));
+    public Mono<ResponseEntity<Flux<Producto>>> lista() {
+        return Mono.just(
+                ResponseEntity.ok()
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(this.productoService.findAll())
+        );
     }
 }
