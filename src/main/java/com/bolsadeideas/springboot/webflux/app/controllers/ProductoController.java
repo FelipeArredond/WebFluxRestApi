@@ -58,6 +58,7 @@ public class ProductoController {
                     return this.productoService.save(p);
                 }).map(p -> ResponseEntity.created(URI.create("/api/productos/" + p.getId()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .body(p));
+                        .body(p))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
