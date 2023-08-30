@@ -4,12 +4,12 @@ import com.bolsadeideas.springboot.webflux.app.models.documents.Producto;
 import com.bolsadeideas.springboot.webflux.app.models.services.ProductoService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.net.URI;
+import java.util.Date;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -34,5 +34,30 @@ public class ProductoController {
         return this.productoService.findById(id)
                 .map(p -> ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping
+    public Mono<ResponseEntity<Producto>> creat(@RequestBody Producto producto) {
+        if (producto.getCreateAt() == null) {
+            producto.setCreateAt(new Date());
+        }
+        return this.productoService.save(producto)
+                .map(p -> ResponseEntity.created(URI.create("/api/productos/" + p.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(p))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<Producto>> editar(@PathVariable String id, @RequestBody Producto producto) {
+        return this.productoService.findById(id)
+                .flatMap(p -> {
+                    p.setNombre(producto.getNombre());
+                    p.setCategoria(producto.getCategoria());
+                    p.setPrecio(producto.getPrecio());
+                    return this.productoService.save(p);
+                }).map(p -> ResponseEntity.created(URI.create("/api/productos/" + p.getId()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(p));
     }
 }
