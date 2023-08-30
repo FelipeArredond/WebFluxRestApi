@@ -2,6 +2,7 @@ package com.bolsadeideas.springboot.webflux.app.controllers;
 
 import com.bolsadeideas.springboot.webflux.app.models.documents.Producto;
 import com.bolsadeideas.springboot.webflux.app.models.services.ProductoService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -61,4 +62,14 @@ public class ProductoController {
                         .body(p))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<Void>> eliminar(@PathVariable String id) {
+        return this.productoService.findById(id)
+                .flatMap(p -> {
+                    return this.productoService.delete(p)
+                            .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
+                }).defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
+    }
 }
+
